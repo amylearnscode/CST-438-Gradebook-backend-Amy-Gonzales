@@ -1,12 +1,14 @@
 package com.cst438.controllers;
 
 import java.util.ArrayList;
+
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import com.cst438.domain.Assignment;
 import com.cst438.domain.AssignmentListDTO;
+import com.cst438.domain.AssignmentListDTO.AssignmentDTO;
 import com.cst438.domain.AssignmentGrade;
 import com.cst438.domain.AssignmentGradeRepository;
 import com.cst438.domain.AssignmentRepository;
@@ -124,6 +127,8 @@ public class GradeBookController {
 		registrationService.sendFinalGrades(course_id, cdto);
 	}
 	
+	
+	
 	private String letterGrade(double grade) {
 		if (grade >= 90) return "A";
 		if (grade >= 80) return "B";
@@ -131,6 +136,36 @@ public class GradeBookController {
 		if (grade >= 60) return "D";
 		return "F";
 	}
+	@PostMapping("/assignment")
+	@Transactional
+	public void addNewAssignment(@RequestBody AssignmentDTO assignment) {
+	   String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+	   Course c = courseRepository.findById(assignment.courseId).orElse(null);
+	   if (!c.getInstructor().equals(email)) {
+         throw new ResponseStatusException( HttpStatus.UNAUTHORIZED, "Not Authorized. " );
+	   }
+	   assignmentRepository.newAssignment(assignment.assignmentName, assignment.dueDate, assignment.courseId);
+	}
+	
+	@PutMapping("/assignment/{id}")
+   @Transactional
+   public void updateAssignment (@RequestBody AssignmentDTO assignment, @PathVariable("id") Integer assignmentId ) {
+      
+      String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+      checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
+      assignmentRepository.updateAssignment(assignment.assignmentName, assignmentId);
+	}
+	
+	@DeleteMapping("/assignment/{id}")
+	@Transactional
+	public void deleteAssignment(@PathVariable("id") Integer assignmentId ) {
+	   String email = "dwisneski@csumb.edu";  // user name (should be instructor's email) 
+      checkAssignment(assignmentId, email);  // check that user name matches instructor email of the course.
+      assignmentRepository.deleteById(assignmentId);
+	}
+      
+      
+	
 	
 	@PutMapping("/gradebook/{id}")
 	@Transactional
