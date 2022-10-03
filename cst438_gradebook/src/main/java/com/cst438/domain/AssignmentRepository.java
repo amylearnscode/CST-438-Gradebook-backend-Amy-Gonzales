@@ -13,11 +13,11 @@ public interface AssignmentRepository extends CrudRepository <Assignment, Intege
 	List<Assignment> findNeedGradingByEmail(@Param("email") String email);
 	
 	@Modifying
-	@Query("INSERT INTO assignment (due_date, name, course_id, needs_grading) VALUES(:dueDate, :assignmentName, :courseId, 1)")
+	@Query(value = "INSERT INTO assignment (due_date, name, course_id, needs_grading) VALUES(:dueDate, :assignmentName, :courseId, 1)", nativeQuery = true)
 	void newAssignment(@Param("assignmentName") String assignmentName, @Param("dueDate") String dueDate, @Param("courseId") int courseId);
    
 	
 	  @Modifying
-	   @Query("UPDATE assignment a set a.name = :assignmentName where a.id = :assignmentId")
+	   @Query("update Assignment a set a.name = :assignmentName where a.id = :assignmentId")
 	   void updateAssignment(@Param("assignmentName") String assignmentName, @Param("assignmentId") int assignmentId);
 }
